@@ -1,0 +1,30 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ResourceGroupName: 'webapp'
+  WEBAPP_NAME: 'pythonapp98600'
+  WEBAPP_PLAN: 'ASP-webapp-a324'
+  REGION: 'Canada Central'
+  azureSubscription: 'azurepythonapp'   # Azure DevOps Service Connection Name
+
+steps:
+  - task: ArchiveFiles@2
+    displayName: 'Archive Files'
+    inputs:
+      rootFolderOrFile: '$(Build.SourcesDirectory)'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      replaceExistingArchive: true
+
+  - task: AzureWebApp@1
+    displayName: 'Deploy to Azure Web App'
+    inputs:
+      azureSubscription: '$(azureSubscription)'
+      appType: 'webAppLinux'
+      appName: '$(WEBAPP_NAME)'
+      package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
