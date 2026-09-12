@@ -9,9 +9,9 @@ pool:
 
 variables:
   ResourceGroupName: 'webapp'
-  WEBAPP_NAME: 'pythonapp98600'
-  WEBAPP_PLAN: 'ASP-webapp-a324'
-  REGION: 'Canada Central'
+  WEBAPP_NAME: 'mywebsite8855'
+  WEBAPP_PLAN: 'ASP-site1-ac69'
+  REGION: 'westus3'
   azureSubscription: 'webapp'
   GREEN_SLOT: 'green'
 
