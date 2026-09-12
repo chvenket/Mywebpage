@@ -9,7 +9,7 @@ variables:
   WEBAPP_NAME: 'mywebsite8855'
   WEBAPP_PLAN: 'ASP-site1-ac69'
   REGION: 'westus3'
-  azureSubscription: 'MySub' # Azure DevOps Service Connection Name
+  azureSubscription: 'webapp' # Azure DevOps Service Connection Name
   slotName: 'green'
 
 steps:
