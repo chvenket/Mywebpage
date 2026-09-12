@@ -5,26 +5,40 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  ResourceGroupName: 'webapp'
-  WEBAPP_NAME: 'pythonapp98600'
-  WEBAPP_PLAN: 'ASP-webapp-a324'
-  REGION: 'Canada Central'
-  azureSubscription: 'azurepythonapp'   # Azure DevOps Service Connection Name
+  ResourceGroupName: 'myrg'
+  WEBAPP_NAME: 'mywebsite8855'
+  WEBAPP_PLAN: 'ASP-site1-ac69'
+  REGION: 'westus3'
+  azureSubscription: 'MySub' # Azure DevOps Service Connection Name
+  slotName: 'green'
 
 steps:
+  - checkout: self
+
   - task: ArchiveFiles@2
-    displayName: 'Archive Files'
+    displayName: 'Archive files'
     inputs:
-      rootFolderOrFile: '$(Build.SourcesDirectory)'
+      rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
       includeRootFolder: false
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       replaceExistingArchive: true
 
   - task: AzureWebApp@1
-    displayName: 'Deploy to Azure Web App'
+    displayName: 'Deploy to Green Slot'
     inputs:
       azureSubscription: '$(azureSubscription)'
       appType: 'webAppLinux'
       appName: '$(WEBAPP_NAME)'
       package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      slotName: '$(slotName)'
+
+  - task: AzureCLI@2
+    displayName: 'Swap Slots'
+    inputs:
+      azureSubscription: '$(azureSubscription)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        echo "Swapping slots..."
+        az webapp deployment slot swap --resource-group $(ResourceGroupName) --name $(WEBAPP_NAME) --slot $(slotName) --target-slot production
