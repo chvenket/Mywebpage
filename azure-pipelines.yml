@@ -12,7 +12,7 @@ variables:
   WEBAPP_NAME: 'pythonapp98600'
   WEBAPP_PLAN: 'ASP-webapp-a324'
   REGION: 'Canada Central'
-  azureSubscription: 'azurepythonapp'
+  azureSubscription: 'webapp'
   GREEN_SLOT: 'green'
 
 steps:
