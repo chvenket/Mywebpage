@@ -11,7 +11,7 @@ def home():
 def health():
     return jsonify({
         'status': 'healthy',
-        'message': 'Application is running',
+        'message': 'Application is running in Green slot',
         'python_version': os.sys.version
     })
 
