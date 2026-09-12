@@ -1,44 +1,59 @@
 trigger:
-  - main
+  branches:
+    include:
+      - main
+      - green
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  ResourceGroupName: 'myrg'
-  WEBAPP_NAME: 'mywebsite8855'
-  WEBAPP_PLAN: 'ASP-site1-ac69'
-  REGION: 'westus3'
-  azureSubscription: 'webapp' # Azure DevOps Service Connection Name
-  slotName: 'green'
+  ResourceGroupName: 'webapp'
+  WEBAPP_NAME: 'pythonapp98600'
+  WEBAPP_PLAN: 'ASP-webapp-a324'
+  REGION: 'Canada Central'
+  azureSubscription: 'azurepythonapp'
+  GREEN_SLOT: 'green'
 
 steps:
-  - checkout: self
 
-  - task: ArchiveFiles@2
-    displayName: 'Archive files'
-    inputs:
-      rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      replaceExistingArchive: true
+# -----------------------------
+# Build / Archive Application
+# -----------------------------
+- task: ArchiveFiles@2
+  displayName: 'Archive Files'
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
 
-  - task: AzureWebApp@1
-    displayName: 'Deploy to Green Slot'
-    inputs:
-      azureSubscription: '$(azureSubscription)'
-      appType: 'webAppLinux'
-      appName: '$(WEBAPP_NAME)'
-      package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      slotName: '$(slotName)'
 
-  - task: AzureCLI@2
-    displayName: 'Swap Slots'
-    inputs:
-      azureSubscription: '$(azureSubscription)'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        echo "Swapping slots..."
-        az webapp deployment slot swap --resource-group $(ResourceGroupName) --name $(WEBAPP_NAME) --slot $(slotName) --target-slot production
+# =========================================
+# MAIN BRANCH → PRODUCTION
+# =========================================
+- task: AzureWebApp@1
+  displayName: 'Deploy Main Branch to Production'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+  inputs:
+    azureSubscription: '$(azureSubscription)'
+    appType: 'webAppLinux'
+    appName: '$(WEBAPP_NAME)'
+    package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+
+
+# =========================================
+# GREEN BRANCH → GREEN SLOT
+# =========================================
+- task: AzureWebApp@1
+  displayName: 'Deploy Green Branch to Green Slot'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/green')
+  inputs:
+    azureSubscription: '$(azureSubscription)'
+    appType: 'webAppLinux'
+    appName: '$(WEBAPP_NAME)'
+    deployToSlotOrASE: true
+    resourceGroupName: '$(ResourceGroupName)'
+    slotName: '$(GREEN_SLOT)'
+    package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
